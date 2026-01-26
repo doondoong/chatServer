@@ -7,7 +7,7 @@ const httpServer = createServer(app);
 const io = new Server(httpServer, {
   cors: {
     // origin: "http://localhost:3000",
-    origin: "https://chat-nkqlbvfyq-jongseoks-projects-f5b7b69d.vercel.app",
+    origin: "https://chat-web-pi-five.vercel.app",
   },
 });
 
