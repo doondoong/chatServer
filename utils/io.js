@@ -6,11 +6,15 @@ module.exports = function (io) {
   io.on("connection", async (socket) => {
     console.log("client is connected", socket.id);
     // 로그인
-    socket.on("login", async (userName, cb) => {
+    socket.on("login", async (userName, password, cb) => {
       try {
-        const user = await userController.saveUser(userName, socket.id);
+        const user = await userController.loginUser(
+          userName,
+          password,
+          socket.id,
+        );
         const welcomeMessage = {
-          chat: `${user.name} is joined to this room`,
+          chat: `${user.userName} is joined to this room`,
           user: { id: null, name: "system" },
         };
         io.emit("message", welcomeMessage);
@@ -24,8 +28,11 @@ module.exports = function (io) {
       try {
         //유저찾기
         const user = await userController.checkUser(socket.id);
+
         //메세지 저장
         const newMessage = await chatController.saveChat(message, user);
+        console.log("newMessage", newMessage);
+
         io.emit("message", newMessage);
         cb({ ok: true });
       } catch (error) {
@@ -33,8 +40,17 @@ module.exports = function (io) {
       }
     });
     // 해제로그
-    socket.on("disconnect", () => {
+    socket.on("disconnect", async () => {
       console.log("user is disconnected", socket.id);
+      const logoutUser = await userController.loginOut(socket.id);
+      console.log(logoutUser);
+
+      const godbyeMessage = {
+        chat: `${logoutUser?.userName ? logoutUser?.userName : "사용자"} is outed to this room`,
+        user: { id: null, name: "system" },
+      };
+      console.log(godbyeMessage, "godbyeMessage");
+      io.emit("message", godbyeMessage);
     });
   });
 };
